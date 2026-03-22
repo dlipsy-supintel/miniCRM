@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { FlaskConical } from 'lucide-react'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 export function DemoBanner() {
   return (
@@ -12,12 +13,15 @@ export function DemoBanner() {
           Demo mode — no data is saved. Exploring the UX only.
         </span>
       </div>
-      <Link
-        href="/login"
-        className="text-xs text-amber-600 dark:text-amber-400 underline underline-offset-2 hover:opacity-80"
-      >
-        Exit demo →
-      </Link>
+      <div className="flex items-center gap-2">
+        <ThemeToggle className="p-1" />
+        <Link
+          href="/login"
+          className="text-xs text-amber-600 dark:text-amber-400 underline underline-offset-2 hover:opacity-80"
+        >
+          Exit demo →
+        </Link>
+      </div>
     </div>
   )
 }

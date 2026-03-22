@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { LogOut, User, ChevronDown } from 'lucide-react'
+import { ThemeToggle } from '@/components/theme-toggle'
 import { createClient } from '@/lib/supabase/client'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
@@ -37,7 +38,9 @@ export function Header({ profile }: HeaderProps) {
       <MobileNav profile={profile} />
       <div className="hidden md:block" />
 
-      <DropdownMenu>
+      <div className="flex items-center gap-1">
+        <ThemeToggle />
+        <DropdownMenu>
         <DropdownMenuTrigger className="flex items-center gap-2 h-8 px-2 rounded-md text-sm hover:bg-accent transition-colors">
           <Avatar className="w-6 h-6">
             <AvatarFallback className="text-xs bg-primary text-primary-foreground">
@@ -59,6 +62,7 @@ export function Header({ profile }: HeaderProps) {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+      </div>
     </header>
   )
 }

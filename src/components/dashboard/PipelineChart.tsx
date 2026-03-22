@@ -11,8 +11,38 @@ interface StageData {
   value: number
 }
 
+interface ChartEntry {
+  name: string
+  value: number
+  count: number
+  color: string
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function CustomTooltip({ active, payload, label }: any) {
+  if (!active || !payload?.length) return null
+  const entry = payload[0].payload as ChartEntry
+  return (
+    <div className="rounded-lg border border-border bg-popover px-3 py-2 shadow-lg">
+      <p className="text-xs font-medium text-foreground">{label}</p>
+      <div className="mt-1.5 flex items-center gap-2">
+        <span
+          className="inline-block h-2.5 w-2.5 rounded-sm"
+          style={{ backgroundColor: entry.color }}
+        />
+        <span className="text-sm font-semibold text-foreground">
+          ${entry.value.toLocaleString()}
+        </span>
+      </div>
+      <p className="mt-0.5 text-[11px] text-muted-foreground">
+        {entry.count} {entry.count === 1 ? 'deal' : 'deals'}
+      </p>
+    </div>
+  )
+}
+
 export function PipelineChart({ data }: { data: StageData[] }) {
-  const chartData = data.map(s => ({
+  const chartData: ChartEntry[] = data.map(s => ({
     name: s.name,
     value: s.value,
     count: s.count,
@@ -34,26 +64,21 @@ export function PipelineChart({ data }: { data: StageData[] }) {
             <BarChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
               <XAxis
                 dataKey="name"
-                tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                tick={{ fontSize: 11 }}
                 axisLine={false}
                 tickLine={false}
+                className="fill-muted-foreground"
               />
               <YAxis
-                tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                tick={{ fontSize: 11 }}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={v => v >= 1000 ? `$${(v/1000).toFixed(0)}k` : `$${v}`}
+                className="fill-muted-foreground"
               />
               <Tooltip
-                contentStyle={{
-                  background: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '6px',
-                  fontSize: '12px',
-                  color: 'hsl(var(--foreground))',
-                }}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                formatter={(value: any) => [`$${Number(value).toLocaleString()}`, 'Value']}
+                content={<CustomTooltip />}
+                cursor={{ fill: 'var(--color-muted)', opacity: 0.4 }}
               />
               <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                 {chartData.map((entry, i) => (
