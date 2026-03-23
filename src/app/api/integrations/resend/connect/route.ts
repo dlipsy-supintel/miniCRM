@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: `Invalid API key: ${err instanceof Error ? err.message : 'Unknown'}` }, { status: 400 })
   }
 
-  await supabase.from('integration_tokens').upsert({
+  const { error } = await supabase.from('integration_tokens').upsert({
     org_id: profile.org_id,
     user_id: user.id,
     provider: 'resend',
@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
     enabled: true,
   }, { onConflict: 'org_id,provider' })
 
+  if (error) return NextResponse.json({ error: `Failed to save: ${error.message}` }, { status: 500 })
   return NextResponse.json({ data: { ok: true } })
 }
 

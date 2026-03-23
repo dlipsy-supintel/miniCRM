@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     const hs = getHubSpotClient(parsed.data.access_token)
     const account = await hs.getAccountInfo()
 
-    await supabase.from('integration_tokens').upsert({
+    const { error } = await supabase.from('integration_tokens').upsert({
       org_id: profile.org_id,
       provider: 'hubspot',
       access_token: parsed.data.access_token,
@@ -31,6 +31,7 @@ export async function POST(request: NextRequest) {
       user_id: user.id,
     }, { onConflict: 'org_id,provider' })
 
+    if (error) return NextResponse.json({ error: `Failed to save: ${error.message}` }, { status: 500 })
     return NextResponse.json({ data: { portal_id: account.portalId, ok: true } })
   } catch (err) {
     return NextResponse.json({ error: `Invalid token: ${err instanceof Error ? err.message : 'Unknown error'}` }, { status: 400 })

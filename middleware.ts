@@ -2,11 +2,16 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  // Guard: if env vars are missing (e.g. Vercel preview without env set), pass through
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return NextResponse.next({ request })
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
       cookies: {
         getAll() {
@@ -23,12 +28,19 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch {
+    // Auth check failed (edge network issue, bad cookie, etc.) — pass through
+    return NextResponse.next({ request })
+  }
 
   const { pathname } = request.nextUrl
 
   // Public routes that don't require auth
-  const publicPaths = ['/login', '/register', '/auth/callback']
+  const publicPaths = ['/login', '/register', '/auth/callback', '/demo']
   const isPublicPath = publicPaths.some(p => pathname.startsWith(p))
 
   // Webhook and MCP routes bypass auth (they have their own auth)
